@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 
 type JobPosting = {
   id: string;
@@ -59,6 +60,7 @@ export default function Page() {
   const [remote, setRemote] = useState("hybrid");
   const [salary, setSalary] = useState(45000);
   const [cvSummary, setCvSummary] = useState("5 ans backend python fastapi postgres");
+  const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(false);
   const [offers, setOffers] = useState<JobPosting[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -89,8 +91,11 @@ export default function Page() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
       });
-      // 2) search
-      const res = await fetch(`${API_BASE}/search`, {
+      // 2) search (avec user_id si fourni)
+      const searchUrl = userId
+        ? `${API_BASE}/search?user_id=${encodeURIComponent(userId)}`
+        : `${API_BASE}/search`;
+      const res = await fetch(searchUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
@@ -107,7 +112,12 @@ export default function Page() {
 
   return (
     <div className="page">
-      <h1>⚡ DevJobs Hunter ⚡</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h1 style={{ margin: 0 }}>⚡ DevJobs Hunter ⚡</h1>
+        <Link href="/profile" style={{ color: "var(--neon-cyan)", textDecoration: "none", fontSize: "0.9rem" }}>
+          👤 Mon Profil
+        </Link>
+      </div>
       <p className="subtitle">
         🚀 Moteur de recherche d&apos;emploi cyberpunk pour les devs · API: {API_BASE}
       </p>
@@ -182,6 +192,17 @@ export default function Page() {
               placeholder="Ex: 5 ans backend Python/Go, expert Kubernetes, IA..."
               rows={3}
             />
+          </label>
+          <label>
+            🔑 ID Utilisateur (optionnel - utilise votre profil sauvegardé)
+            <input
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              placeholder="votre.email@example.com"
+            />
+            <small style={{ color: "var(--text-muted)", fontSize: "0.8rem", display: "block", marginTop: 4 }}>
+              Laissez vide ou entrez votre ID pour utiliser votre profil sauvegardé
+            </small>
           </label>
         </div>
 
